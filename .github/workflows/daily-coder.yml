@@ -1,0 +1,51 @@
+name: Daily AI Coder
+
+# When should this workflow run?
+on:
+  schedule:
+    # This cron expression means "Run at 08:00 UTC every day"
+    - cron: '0 8 * * *'
+  workflow_dispatch: # This allows you to run it manually from the GitHub UI for testing
+
+jobs:
+  run-ai-agent:
+    runs-on: ubuntu-latest
+    
+    # Give the action permission to push code to your repository
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Configure Git User
+        # Set up a bot user to make the commits under
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run AI Agent
+        # Pass the secret API key to the script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python agent.py
+
+      - name: Commit and Push Changes
+        run: |
+          git add generated_code/
+          # Only commit and push if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "Auto-commit: Daily AI generated code $(date +'%Y_%m_%d')"
+            git push
+          else
+            echo "No changes to commit."
+          fi
