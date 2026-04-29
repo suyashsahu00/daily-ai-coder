@@ -1,36 +1,24 @@
 import os
 from datetime import datetime
-import google.generativeai as genai
 
-# Configure the API key using environment variables
-api_key = os.environ.get("GEMINI_API_KEY")
-if not api_key:
-    raise ValueError("GEMINI_API_KEY environment variable not set. Please set it in GitHub Secrets.")
-
-genai.configure(api_key=api_key)
 
 def generate_code():
-    """Asks the AI to generate a piece of code."""
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    """Returns a simple Python snippet."""
     
-    prompt = """
-    Write a single, useful Python snippet. It could be an algorithm, data structure, or a utility function.
-    Include comments explaining how it works.
-    Return ONLY the raw python code. Do not wrap it in markdown block quotes like ```python.
-    """
-    
-    response = model.generate_content(prompt)
-    
-    # Clean up possible markdown wrappers if the AI still returns them
-    text = response.text.strip()
-    if text.startswith("```python"):
-        text = text[len("```python"):].strip()
-    if text.startswith("```"):
-        text = text[len("```"):].strip()
-    if text.endswith("```"):
-        text = text[:-len("```")].strip()
-        
-    return text
+    text = """
+# Simple Python snippet
+def add_numbers(a, b):
+    # Returns the sum of a and b
+    return a + b
+
+def subtract_numbers(a, b):
+    # Returns the difference of a and b
+    return a - b
+
+print(f"10 + 5 = {add_numbers(10, 5)}")
+print(f"10 - 5 = {subtract_numbers(10, 5)}")
+"""
+    return text.strip()
 
 def main():
     print("Generating code...")
